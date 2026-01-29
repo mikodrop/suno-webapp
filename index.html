@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeCraft Creator</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: var(--tg-theme-bg-color, #181818);
+            color: var(--tg-theme-text-color, #ffffff);
+            font-family: sans-serif;
+            padding: 20px;
+            margin: 0;
+        }
+        .container { display: flex; flex-direction: column; gap: 15px; }
+        
+        label { font-weight: bold; margin-bottom: 5px; display: block; }
+        
+        /* Текстовые поля */
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            background-color: var(--tg-theme-secondary-bg-color, #2a2a2a);
+            color: var(--tg-theme-text-color, #fff);
+            font-size: 16px;
+            resize: none;
+            box-sizing: border-box; /* Важно, чтобы не вылезало за края */
+        }
+        textarea:focus, input:focus { outline: 2px solid #6c5ce7; }
+
+        /* Переключатель (Toggle) */
+        .toggle-container {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--tg-theme-secondary-bg-color, #2a2a2a);
+            padding: 15px; border-radius: 12px;
+        }
+        .switch {
+            position: relative; display: inline-block; width: 50px; height: 28px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #6c5ce7; }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* Подсказки */
+        .hint { font-size: 12px; color: #888; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="toggle-container">
+        <span>🎻 Инструментал (без слов)</span>
+        <label class="switch">
+            <input type="checkbox" id="instrumental">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div>
+        <label for="prompt">💡 Описание или Текст песни</label>
+        <textarea id="prompt" rows="4" placeholder="Грустный рэп про экзамены... ИЛИ Вставь сюда свой текст"></textarea>
+        <div class="hint" id="mode-hint">Если инструментал выключен, AI споет этот текст (или придумает его).</div>
+    </div>
+
+    <div>
+        <label for="style">🎸 Стиль / Жанр</label>
+        <input type="text" id="style" placeholder="Pop, Rock, Phonk, Jazz...">
+    </div>
+
+    <div>
+        <label for="title">🏷 Название трека</label>
+        <input type="text" id="title" placeholder="My Hit Song">
+    </div>
+
+</div>
+
+<script>
+    let tg = window.Telegram.WebApp;
+    tg.expand(); // Растянуть на весь экран
+
+    // Настраиваем Главную Кнопку (MainButton)
+    tg.MainButton.text = "СОЗДАТЬ ТРЕК 🚀";
+    tg.MainButton.show();
+
+    // Логика нажатия
+    Telegram.WebApp.onEvent('mainButtonClicked', function(){
+        let isInstrumental = document.getElementById("instrumental").checked;
+        let promptText = document.getElementById("prompt").value;
+        let styleText = document.getElementById("style").value;
+        let titleText = document.getElementById("title").value;
+
+        // Простая валидация
+        if (promptText.trim() === "" && !isInstrumental) {
+            tg.showPopup({title: "Ошибка", message: "Напиши описание или текст песни!"});
+            return;
+        }
+        if (styleText.trim() === "") {
+            tg.showPopup({title: "Ошибка", message: "Укажи стиль музыки!"});
+            return;
+        }
+
+        // Формируем JSON для отправки боту
+        let data = {
+            mode: isInstrumental ? "instrumental" : "normal",
+            description: promptText,
+            genre: styleText,
+            title: titleText || "VibeCraft Track"
+        };
+
+        // Отправляем и закрываем
+        tg.sendData(JSON.stringify(data));
+    });
+
+</script>
+</body>
+</html>
