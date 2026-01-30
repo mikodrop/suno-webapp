@@ -2,157 +2,68 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suno VibeCraft</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --bg-color: #0f0f0f;
-            --card-bg: #1f1f1f;
-            --input-bg: #2a2a2a;
-            --text-main: #ffffff;
-            --text-secondary: #a0a0a0;
-            --accent: #8b5cf6;
-            --magic: #eab308; /* Золотой цвет для магии */
-        }
-
-        body {
-            background-color: var(--bg-color); color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0; padding: 16px; padding-bottom: 80px;
-        }
-
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; }
-        
-        input[type="text"], textarea {
-            width: 100%; background-color: var(--input-bg); border: 1px solid transparent;
-            border-radius: 10px; padding: 12px; color: var(--text-main); font-size: 15px;
-            box-sizing: border-box; outline: none; transition: 0.2s; font-family: inherit;
-        }
-        input:focus, textarea:focus { border-color: var(--accent); background-color: #333; }
-        textarea { resize: vertical; min-height: 80px; }
-
-        /* Тумблеры */
-        .toggle-row {
-            display: flex; justify-content: space-between; align-items: center;
-            background-color: var(--card-bg); padding: 12px 16px;
-            border-radius: 12px; margin-bottom: 15px;
-        }
-        .toggle-label-text { font-size: 15px; font-weight: 500; }
-        
-        /* Magic Toggle */
-        .magic-row { border: 1px solid #eab30844; background: linear-gradient(45deg, #1f1f1f, #2a2205); }
-        .magic-text { color: var(--magic); font-weight: bold; display: flex; align-items: center; gap: 6px; }
-
-        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .3s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-        
-        /* Цвета слайдеров */
-        input:checked + .slider { background-color: var(--accent); }
-        input.magic-checkbox:checked + .slider { background-color: var(--magic); }
-        input:checked + .slider:before { transform: translateX(22px); }
-
-        /* Пресеты */
-        .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
-        .tabs::-webkit-scrollbar { display: none; }
-        .tab-btn { background: var(--card-bg); color: var(--text-secondary); border: 1px solid #333; padding: 8px 16px; border-radius: 20px; font-size: 13px; white-space: nowrap; cursor: pointer; transition: 0.2s; }
-        .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-        
-        .chips-area { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
-        .chip { background: #2d2d2d; color: #ddd; padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; border: 1px solid #3a3a3a; }
-        .chip:hover { border-color: var(--accent); color: white; }
-
-        .random-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--accent); margin-top: 5px; cursor: pointer; }
+        body { background: #111; color: #fff; font-family: sans-serif; padding: 20px; }
+        input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 8px; box-sizing: border-box; }
+        label { color: #aaa; font-size: 12px; display: block; margin-bottom: 5px; }
+        .btn { width: 100%; padding: 15px; background: #8b5cf6; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .switch-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; background: #222; padding: 10px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
-    <div class="form-group">
-        <label>Title (Название)</label>
-        <input type="text" id="title" placeholder="My Hit Song">
+    <label>Название трека</label>
+    <input type="text" id="title" placeholder="Hit Song">
+
+    <label>Стиль музыки (Обязательно)</label>
+    <input type="text" id="style" placeholder="Rock, Pop, Phonk...">
+
+    <div class="switch-container">
+        <span>Инструментал (без слов)</span>
+        <input type="checkbox" id="instrumental">
     </div>
 
-    <div class="form-group">
-        <label>Style of Music (Стиль / Описание)</label>
-        <div class="tabs" id="tabs-container">
-            <button class="tab-btn active" onclick="setCategory('trending')">🔥 Trends</button>
-            <button class="tab-btn" onclick="setCategory('electronic')">🎹 Electro</button>
-            <button class="tab-btn" onclick="setCategory('rock')">🎸 Rock</button>
-            <button class="tab-btn" onclick="setCategory('hiphop')">🎤 Rap</button>
-        </div>
-        <div class="chips-area" id="chips-container"></div>
-        <div class="random-btn" onclick="setRandomStyle()">🎲 Случайный стиль</div>
-        <textarea id="style" rows="2" style="margin-top: 10px;" placeholder="Выбери стиль или напиши: 'Грустная песня про кота'"></textarea>
-    </div>
+    <label>Текст песни (или описание)</label>
+    <textarea id="lyrics" rows="4" placeholder="Текст песни..."></textarea>
 
-    <div class="toggle-row magic-row">
-        <span class="toggle-label-text magic-text">✨ Magic Prompt (Улучшить AI)</span>
-        <label class="switch">
-            <input type="checkbox" id="magic" class="magic-checkbox">
-            <span class="slider"></span>
-        </label>
-    </div>
-
-    <div class="toggle-row">
-        <span class="toggle-label-text">🎻 Instrumental (Без слов)</span>
-        <label class="switch">
-            <input type="checkbox" id="instrumental" onchange="toggleMode()">
-            <span class="slider"></span>
-        </label>
-    </div>
-
-    <div class="form-group" id="lyrics-group">
-        <label>Lyrics (Текст)</label>
-        <textarea id="lyrics" rows="5" placeholder="Оставь пустым, и AI напишет текст сам."></textarea>
-    </div>
+    <button class="btn" onclick="sendData()">СОЗДАТЬ ТРЕК 🚀</button>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
-    tg.MainButton.text = "СОЗДАТЬ ТРЕК 🚀";
-    tg.MainButton.color = "#8b5cf6";
-    tg.MainButton.show();
 
-    // Пресеты (сократил для примера, оставь свои если хочешь)
-    const presets = {
-        'trending': [ {name: 'Drift Phonk 🏎️', val: 'Aggressive drift phonk, cowbell, distorted bass'}, {name: 'Epic Trailer 🎬', val: 'Cinematic, orchestral, epic build up'} ],
-        'electronic': [ {name: 'Cyberpunk 🤖', val: 'Cyberpunk, industrial, heavy synth bass'}, {name: 'Techno 🔨', val: 'Dark techno, industrial, heavy kick'} ],
-        'rock': [ {name: 'Heavy Metal 🤘', val: 'Heavy metal, aggressive guitar riffs'}, {name: 'Indie Rock 🎸', val: 'Indie rock, upbeat'} ],
-        'hiphop': [ {name: 'Trap 🔫', val: 'Dark trap, 808 bass, triplets'}, {name: 'Lo-Fi ☕', val: 'Lofi hip hop beats, chill, relaxing'} ]
-    };
+    function sendData() {
+        // 1. ПРОВЕРКА: Показываем алерт, чтобы понять, что клик работает
+        // Если ты видишь это окно - значит HTML в порядке
+        // alert("Отправка данных..."); 
 
-    setCategory('trending');
-    function setCategory(cat) {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        const container = document.getElementById('chips-container');
-        container.innerHTML = '';
-        presets[cat].forEach(p => {
-            const c = document.createElement('div'); c.className = 'chip'; c.innerText = p.name;
-            c.onclick = () => { document.getElementById('style').value = p.val; if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light'); };
-            container.appendChild(c);
-        });
-    }
-    function setRandomStyle() { /* ... твой старый код ... */ }
-    function toggleMode() {
-        const isInst = document.getElementById('instrumental').checked;
-        document.getElementById('lyrics-group').style.display = isInst ? 'none' : 'block';
-    }
+        let title = document.getElementById("title").value;
+        let style = document.getElementById("style").value;
+        let lyrics = document.getElementById("lyrics").value;
+        let isInst = document.getElementById("instrumental").checked;
 
-    Telegram.WebApp.onEvent('mainButtonClicked', function(){
-        const data = {
-            title: document.getElementById('title').value.trim() || "Track",
-            style: document.getElementById('style').value.trim(),
-            lyrics: document.getElementById('lyrics').value.trim(),
-            is_instrumental: document.getElementById('instrumental').checked,
-            use_magic: document.getElementById('magic').checked // <--- ОТПРАВЛЯЕМ ФЛАГ МАГИИ
+        if (!style) {
+            tg.showPopup({title: "Ошибка", message: "Укажи стиль музыки!"});
+            return;
+        }
+
+        let data = {
+            title: title || "New Track",
+            style: style,
+            lyrics: lyrics,
+            is_instrumental: isInst
         };
-        if(!data.style) { tg.showPopup({title:"Ошибка", message:"Укажи стиль!"}); return; }
-        tg.sendData(JSON.stringify(data));
-    });
+
+        // 2. ОТПРАВКА
+        try {
+            tg.sendData(JSON.stringify(data));
+        } catch (e) {
+            alert("Ошибка отправки: " + e);
+        }
+    }
 </script>
 </body>
 </html>
