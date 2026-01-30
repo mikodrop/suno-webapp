@@ -2,68 +2,232 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suno VibeCraft</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VibeCraft Studio</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #111; color: #fff; font-family: sans-serif; padding: 20px; }
-        input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 8px; box-sizing: border-box; }
-        label { color: #aaa; font-size: 12px; display: block; margin-bottom: 5px; }
-        .btn { width: 100%; padding: 15px; background: #8b5cf6; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        .switch-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; background: #222; padding: 10px; border-radius: 8px; }
+        :root {
+            --bg-color: #121212; /* Глубокий черный */
+            --card-bg: #1e1e1e;   /* Темно-серый для блоков */
+            --input-bg: #2c2c2c;  /* Поля ввода */
+            --text-main: #ffffff;
+            --text-sub: #a0a0a0;
+            --accent: #8b5cf6;    /* Фиолетовый (Suno) */
+            --magic: #ffd700;     /* Золотой (AI Magic) */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 16px;
+            padding-bottom: 40px;
+        }
+
+        /* Заголовки полей */
+        .label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Поля ввода */
+        input[type="text"], textarea {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid transparent;
+            border-radius: 12px;
+            padding: 14px;
+            color: var(--text-main);
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        input:focus, textarea:focus {
+            border-color: var(--accent);
+            background-color: #333;
+        }
+        textarea { resize: none; }
+
+        /* --- ЧИПСЫ СТИЛЕЙ (Кнопки выбора) --- */
+        .chips-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            scrollbar-width: none; /* Скрыть скролл */
+        }
+        .chips-container::-webkit-scrollbar { display: none; }
+
+        .chip {
+            background-color: var(--card-bg);
+            border: 1px solid #333;
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .chip:active { transform: scale(0.95); }
+        .chip.selected {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        /* --- ТУМБЛЕРЫ (Instrumental / Magic) --- */
+        .toggle-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        /* Стили переключателя */
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #444; transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* Особый стиль для Magic Toggle */
+        .magic-card {
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            background: linear-gradient(135deg, #1e1e1e 0%, #2a2500 100%);
+        }
+        .magic-text { color: var(--magic); font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .magic-switch input:checked + .slider { background-color: var(--magic); }
+
+        /* Подсказки */
+        .hint { font-size: 12px; color: #666; margin-top: 6px; }
+
+        /* Скрытие блоков */
+        .hidden { display: none; }
+
     </style>
 </head>
 <body>
 
-    <label>Название трека</label>
-    <input type="text" id="title" placeholder="Hit Song">
+    <div class="label">1. Название трека</div>
+    <input type="text" id="title" placeholder="Например: Любовь и Роботы">
 
-    <label>Стиль музыки (Обязательно)</label>
-    <input type="text" id="style" placeholder="Rock, Pop, Phonk...">
+    <div class="label">2. Стиль музыки</div>
+    <div class="chips-container" id="style-chips">
+        <div class="chip" onclick="selectStyle('Pop')">Pop</div>
+        <div class="chip" onclick="selectStyle('Rock')">Rock</div>
+        <div class="chip" onclick="selectStyle('Phonk')">Phonk</div>
+        <div class="chip" onclick="selectStyle('Rap')">Rap</div>
+        <div class="chip" onclick="selectStyle('Jazz')">Jazz</div>
+        <div class="chip" onclick="selectStyle('Electronic')">Electronic</div>
+    </div>
+    <input type="text" id="style" style="margin-top: 10px;" placeholder="Или напиши свой (Dark Techno...)">
 
-    <div class="switch-container">
-        <span>Инструментал (без слов)</span>
-        <input type="checkbox" id="instrumental">
+    <div class="toggle-card">
+        <span>🎻 Инструментал (без слов)</span>
+        <label class="switch">
+            <input type="checkbox" id="instrumental" onchange="toggleFields()">
+            <span class="slider"></span>
+        </label>
     </div>
 
-    <label>Текст песни (или описание)</label>
-    <textarea id="lyrics" rows="4" placeholder="Текст песни..."></textarea>
+    <div id="lyrics-section">
+        
+        <div class="label">3. О чем песня? (Тема)</div>
+        <input type="text" id="topic" placeholder="Поздравление для девушки Алины...">
+        <div class="hint">Бот придумает текст на эту тему.</div>
 
-    <button class="btn" onclick="sendData()">СОЗДАТЬ ТРЕК 🚀</button>
+        <div class="label" style="margin-top: 25px;">5. Текст песни (Опционально)</div>
+        <textarea id="lyrics" rows="5" placeholder="Если есть свои стихи - вставь сюда.&#10;Если пусто - AI напишет сам по теме выше."></textarea>
+    
+    </div>
+
+    <div class="toggle-card magic-card">
+        <span class="magic-text">✨ Улучшить промт (AI Magic)</span>
+        <label class="switch magic-switch">
+            <input type="checkbox" id="magic" checked>
+            <span class="slider"></span>
+        </label>
+    </div>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
+    
+    // Настраиваем главную кнопку
+    tg.MainButton.text = "СОЗДАТЬ ТРЕК 🚀";
+    tg.MainButton.color = "#8b5cf6"; // Фиолетовый
+    tg.MainButton.show();
 
-    function sendData() {
-        // 1. ПРОВЕРКА: Показываем алерт, чтобы понять, что клик работает
-        // Если ты видишь это окно - значит HTML в порядке
-        // alert("Отправка данных..."); 
+    // Логика выбора стиля (чипсы)
+    function selectStyle(val) {
+        document.getElementById('style').value = val;
+        // Визуальное выделение
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+        event.target.classList.add('selected');
+        // Вибрация
+        if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    }
 
-        let title = document.getElementById("title").value;
-        let style = document.getElementById("style").value;
-        let lyrics = document.getElementById("lyrics").value;
+    // Логика скрытия полей при Инструментале
+    function toggleFields() {
+        let isInst = document.getElementById('instrumental').checked;
+        let section = document.getElementById('lyrics-section');
+        
+        if (isInst) {
+            section.style.display = 'none';
+        } else {
+            section.style.display = 'block';
+        }
+    }
+
+    // Отправка данных
+    Telegram.WebApp.onEvent('mainButtonClicked', function(){
+        let title = document.getElementById("title").value.trim();
+        let style = document.getElementById("style").value.trim();
+        let topic = document.getElementById("topic").value.trim();
+        let lyrics = document.getElementById("lyrics").value.trim();
         let isInst = document.getElementById("instrumental").checked;
+        let useMagic = document.getElementById("magic").checked;
 
+        // Валидация
         if (!style) {
-            tg.showPopup({title: "Ошибка", message: "Укажи стиль музыки!"});
+            tg.showPopup({title: "Ошибка", message: "Пожалуйста, выбери или напиши стиль музыки!"});
             return;
         }
 
+        // Собираем объект
         let data = {
             title: title || "New Track",
             style: style,
-            lyrics: lyrics,
-            is_instrumental: isInst
+            topic: topic,      // Новое поле "Тема"
+            lyrics: lyrics,    // Поле "Текст"
+            is_instrumental: isInst,
+            use_magic: useMagic
         };
 
-        // 2. ОТПРАВКА
-        try {
-            tg.sendData(JSON.stringify(data));
-        } catch (e) {
-            alert("Ошибка отправки: " + e);
-        }
-    }
+        tg.sendData(JSON.stringify(data));
+    });
 </script>
 </body>
 </html>
