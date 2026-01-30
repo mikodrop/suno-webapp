@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Suno Creator</title>
+    <title>Suno VibeCraft</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -12,8 +12,8 @@
             --input-bg: #2a2a2a;
             --text-main: #ffffff;
             --text-secondary: #a0a0a0;
-            --accent: #f2f2f2; 
-            --purple: #8b5cf6; /* Цвет Suno */
+            --accent: #8b5cf6; /* Suno Purple */
+            --accent-hover: #7c3aed;
         }
 
         body {
@@ -23,84 +23,120 @@
             margin: 0;
             padding: 16px;
             box-sizing: border-box;
+            padding-bottom: 80px; /* Место под кнопку */
         }
 
-        h2 { margin-top: 0; font-size: 20px; font-weight: 700; margin-bottom: 20px; }
-
+        /* --- Стили полей ввода --- */
         .form-group { margin-bottom: 20px; }
-
         label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            display: block; font-size: 13px; font-weight: 600; 
+            color: var(--text-secondary); margin-bottom: 8px; 
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
-
-        /* Поля ввода в стиле Suno */
         input[type="text"], textarea {
-            width: 100%;
-            background-color: var(--input-bg);
-            border: 1px solid transparent;
-            border-radius: 8px;
-            padding: 12px;
-            color: var(--text-main);
-            font-size: 15px;
-            box-sizing: border-box;
-            outline: none;
-            transition: 0.2s;
+            width: 100%; background-color: var(--input-bg);
+            border: 1px solid transparent; border-radius: 10px;
+            padding: 12px; color: var(--text-main); font-size: 15px;
+            box-sizing: border-box; outline: none; transition: 0.2s;
             font-family: inherit;
         }
-
-        textarea { resize: vertical; min-height: 80px; }
-        
         input:focus, textarea:focus {
-            border-color: var(--text-secondary);
-            background-color: #333;
+            border-color: var(--accent); background-color: #333;
         }
+        textarea { resize: vertical; min-height: 80px; }
 
-        /* Тумблер Instrumental */
+        /* --- Тумблер Instrumental --- */
         .toggle-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--card-bg);
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--card-bg); padding: 12px 16px;
+            border-radius: 12px; margin-bottom: 20px;
         }
-
-        .toggle-label-text {
-            font-size: 16px;
-            font-weight: 500;
-        }
-
+        .toggle-label-text { font-size: 16px; font-weight: 500; }
         .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #444; transition: .4s; border-radius: 34px;
+            background-color: #444; transition: .3s; border-radius: 34px;
         }
         .slider:before {
             position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px;
-            background-color: white; transition: .4s; border-radius: 50%;
+            background-color: white; transition: .3s; border-radius: 50%;
         }
-        input:checked + .slider { background-color: var(--purple); }
+        input:checked + .slider { background-color: var(--accent); }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        /* Подсказки */
-        .hint { font-size: 12px; color: #666; margin-top: 6px; }
+        /* --- ПРЕСЕТЫ (КРАСОТА) --- */
+        .presets-container { margin-bottom: 15px; }
+        
+        /* Табы категорий */
+        .tabs {
+            display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px;
+            scrollbar-width: none; /* Firefox */
+        }
+        .tabs::-webkit-scrollbar { display: none; } /* Chrome */
+        
+        .tab-btn {
+            background: var(--card-bg); color: var(--text-secondary);
+            border: 1px solid #333; padding: 8px 16px; border-radius: 20px;
+            font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer;
+            transition: 0.2s;
+        }
+        .tab-btn.active {
+            background: var(--accent); color: white; border-color: var(--accent);
+        }
 
-        /* Анимация скрытия */
-        .hidden { display: none; }
+        /* Область чипсов */
+        .chips-area {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;
+            min-height: 40px;
+        }
+        .chip {
+            background: #2d2d2d; color: #ddd; padding: 8px 14px;
+            border-radius: 8px; font-size: 13px; cursor: pointer;
+            border: 1px solid #3a3a3a; transition: 0.2s; user-select: none;
+        }
+        .chip:active { transform: scale(0.95); }
+        .chip:hover { border-color: var(--accent); color: white; }
+
+        /* Кнопка Рандом */
+        .random-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 12px; color: var(--accent); margin-top: 5px; cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
 
+    <div class="form-group">
+        <label>Title (Название)</label>
+        <input type="text" id="title" placeholder="My Hit Song">
+    </div>
+
+    <div class="form-group">
+        <label>Style of Music (Стиль)</label>
+        
+        <div class="presets-container">
+            <div class="tabs" id="tabs-container">
+                <button class="tab-btn active" onclick="setCategory('trending')">🔥 Trends</button>
+                <button class="tab-btn" onclick="setCategory('electronic')">🎹 Electro</button>
+                <button class="tab-btn" onclick="setCategory('rock')">🎸 Rock</button>
+                <button class="tab-btn" onclick="setCategory('hiphop')">🎤 Rap</button>
+                <button class="tab-btn" onclick="setCategory('chill')">☁️ Chill</button>
+            </div>
+            
+            <div class="chips-area" id="chips-container"></div>
+            
+            <div class="random-btn" onclick="setRandomStyle()">
+                🎲 Мне повезет (Случайный стиль)
+            </div>
+        </div>
+
+        <textarea id="style" rows="2" placeholder="Нажми на кнопку выше или напиши сам..."></textarea>
+    </div>
+
     <div class="toggle-row">
-        <span class="toggle-label-text">🎻 Instrumental</span>
+        <span class="toggle-label-text">🎻 Instrumental (Без слов)</span>
         <label class="switch">
             <input type="checkbox" id="instrumental" onchange="toggleMode()">
             <span class="slider"></span>
@@ -108,39 +144,104 @@
     </div>
 
     <div class="form-group" id="lyrics-group">
-        <label>Lyrics (Текст песни)</label>
-        <textarea id="lyrics" rows="6" placeholder="Введи свой текст здесь...&#10;[Verse 1]&#10;Я иду по улице...&#10;&#10;Или оставь пустым, чтобы AI придумал текст сам."></textarea>
-    </div>
-
-    <div class="form-group">
-        <label>Style of Music (Стиль / Описание)</label>
-        <textarea id="style" rows="3" placeholder="Например: Epic orchestral, Heavy Metal, 80s pop..."></textarea>
-        <div class="hint">Опиши жанр и настроение трека.</div>
-    </div>
-
-    <div class="form-group">
-        <label>Title (Название)</label>
-        <input type="text" id="title" placeholder="My Awesome Track">
+        <label>Lyrics (Текст)</label>
+        <textarea id="lyrics" rows="5" placeholder="Оставь пустым, чтобы AI придумал текст сам.&#10;Или вставь свои стихи."></textarea>
     </div>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
-    tg.MainButton.text = "Create";
-    tg.MainButton.color = "#8b5cf6"; // Фиолетовый цвет Suno
+    tg.MainButton.text = "СОЗДАТЬ ТРЕК 🚀";
+    tg.MainButton.color = "#8b5cf6";
     tg.MainButton.show();
 
+    // === БАЗА ДАННЫХ ПРЕСЕТОВ ===
+    const presets = {
+        'trending': [
+            { name: 'Drift Phonk 🏎️', val: 'Aggressive drift phonk, cowbell, distorted bass, high bpm' },
+            { name: 'Epic Trailer 🎬', val: 'Cinematic, orchestral, epic build up, heroic, trailer music' },
+            { name: 'Russian Doomer 🏢', val: 'Russian post-punk, dark wave, melancholic, deep male vocals, reverb guitar' },
+            { name: 'Hyperpop ✨', val: 'Hyperpop, glitchcore, auto-tune, high pitched vocals, energetic' }
+        ],
+        'electronic': [
+            { name: 'Cyberpunk 🤖', val: 'Cyberpunk, industrial, heavy synth bass, futuristic' },
+            { name: 'Techno 🔨', val: 'Dark techno, industrial, repetitive, heavy kick, 130 bpm' },
+            { name: 'Synthwave 🌆', val: '80s synthwave, retro, neon, analog synths, driving beat' },
+            { name: 'DnB 🥁', val: 'Liquid drum and bass, atmospheric, fast breakbeats, soulful vocals' }
+        ],
+        'rock': [
+            { name: 'Heavy Metal 🤘', val: 'Heavy metal, aggressive guitar riffs, powerful drums, screaming vocals' },
+            { name: 'Indie Rock 🎸', val: 'Indie rock, upbeat, british rock, catchy guitar hook' },
+            { name: 'Grunge 🧥', val: '90s grunge, distorted guitar, angst, heavy drums, nirvana style' },
+            { name: 'Pop Punk 🛹', val: '2000s pop punk, energetic, catchy chorus, fast tempo' }
+        ],
+        'hiphop': [
+            { name: 'Trap 🔫', val: 'Dark trap, 808 bass, triplets hi-hats, auto-tune rap' },
+            { name: 'Old School 🧢', val: '90s boom bap, hip hop, vinyl crackle, jazz samples, flow' },
+            { name: 'Lo-Fi Rap ☕', val: 'Lofi hip hop, chill beats, spoken word, relaxing' },
+            { name: 'Drill 🇬🇧', val: 'UK drill, sliding 808s, dark piano, aggressive flow' }
+        ],
+        'chill': [
+            { name: 'Lofi Study 📚', val: 'Lofi hip hop beats to study to, chill, relaxing, vinyl static, piano' },
+            { name: 'Ambient 🌌', val: 'Ambient, atmospheric, space, ethereal, meditation, no drums' },
+            { name: 'Jazz Cafe 🎷', val: 'Smooth jazz, saxophone, piano, coffee shop atmosphere' },
+            { name: 'Acoustic 🏕️', val: 'Acoustic guitar, folk, campfire, warm, male vocals' }
+        ]
+    };
+
+    // === ЛОГИКА ИНТЕРФЕЙСА ===
+    
+    // 1. Инициализация (загружаем тренды)
+    setCategory('trending');
+
+    // 2. Смена категории
+    function setCategory(cat) {
+        // Подсветка табов
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active'); // Тот, на который нажали
+
+        // Рендер чипсов
+        const container = document.getElementById('chips-container');
+        container.innerHTML = ''; // Очистить старые
+        
+        presets[cat].forEach(preset => {
+            const chip = document.createElement('div');
+            chip.className = 'chip';
+            chip.innerText = preset.name;
+            chip.onclick = () => {
+                // Анимация нажатия
+                chip.style.transform = 'scale(0.9)';
+                setTimeout(() => chip.style.transform = 'scale(1)', 100);
+                
+                // Вставка текста
+                document.getElementById('style').value = preset.val;
+                
+                // Виброотклик (если поддерживается)
+                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            };
+            container.appendChild(chip);
+        });
+    }
+
+    // 3. Случайный стиль
+    function setRandomStyle() {
+        const categories = Object.keys(presets);
+        const randCat = categories[Math.floor(Math.random() * categories.length)];
+        const items = presets[randCat];
+        const randItem = items[Math.floor(Math.random() * items.length)];
+        
+        document.getElementById('style').value = randItem.val;
+        if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    }
+
+    // 4. Тумблер Инструментал
     function toggleMode() {
         const isInst = document.getElementById('instrumental').checked;
         const lyricsGroup = document.getElementById('lyrics-group');
-        
-        if (isInst) {
-            lyricsGroup.style.display = 'none';
-        } else {
-            lyricsGroup.style.display = 'block';
-        }
+        lyricsGroup.style.display = isInst ? 'none' : 'block';
     }
 
+    // 5. Отправка данных боту
     Telegram.WebApp.onEvent('mainButtonClicked', function(){
         const isInst = document.getElementById('instrumental').checked;
         const lyrics = document.getElementById('lyrics').value.trim();
@@ -148,13 +249,12 @@
         const title = document.getElementById('title').value.trim();
 
         if (!style) {
-            tg.showPopup({title: "Ошибка", message: "Поле Style of Music обязательно!"});
+            tg.showPopup({title: "Ой!", message: "Выбери стиль музыки или напиши свой!"});
             return;
         }
 
-        // Логика отправки
         const data = {
-            title: title || "Suno Track",
+            title: title || "VibeCraft Track",
             style: style,
             lyrics: lyrics,
             is_instrumental: isInst
@@ -162,6 +262,7 @@
 
         tg.sendData(JSON.stringify(data));
     });
+
 </script>
 </body>
 </html>
