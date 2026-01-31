@@ -6,389 +6,123 @@
     <title>VibeCraft Creator</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             background-color: var(--tg-theme-bg-color, #181818);
             color: var(--tg-theme-text-color, #ffffff);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: sans-serif;
             padding: 20px;
-            padding-bottom: 80px;
+            margin: 0;
         }
-
-        .container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
-        }
-
-        .header p {
-            color: #888;
-            font-size: 14px;
-        }
-
-        label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: block;
-            font-size: 15px;
-        }
-
+        .container { display: flex; flex-direction: column; gap: 15px; }
+        
+        label { font-weight: bold; margin-bottom: 5px; display: block; }
+        
         /* Текстовые поля */
         textarea, input[type="text"] {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             border-radius: 12px;
-            border: 2px solid #333;
+            border: 1px solid #333;
             background-color: var(--tg-theme-secondary-bg-color, #2a2a2a);
             color: var(--tg-theme-text-color, #fff);
-            font-size: 15px;
+            font-size: 16px;
             resize: none;
-            transition: border-color 0.3s;
+            box-sizing: border-box; /* Важно, чтобы не вылезало за края */
         }
+        textarea:focus, input:focus { outline: 2px solid #6c5ce7; }
 
-        textarea:focus, input:focus {
-            outline: none;
-            border-color: #8b5cf6;
-        }
-
-        /* Переключатель */
+        /* Переключатель (Toggle) */
         .toggle-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
             background: var(--tg-theme-secondary-bg-color, #2a2a2a);
-            padding: 16px;
-            border-radius: 12px;
-            border: 2px solid #333;
+            padding: 15px; border-radius: 12px;
         }
-
-        .toggle-label {
-            font-size: 15px;
-            font-weight: 600;
-        }
-
         .switch {
-            position: relative;
-            display: inline-block;
-            width: 52px;
-            height: 28px;
+            position: relative; display: inline-block; width: 50px; height: 28px;
         }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
+        .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #444;
-            transition: .3s;
-            border-radius: 34px;
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .4s; border-radius: 34px;
         }
-
         .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
+            position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px;
+            background-color: white; transition: .4s; border-radius: 50%;
         }
-
-        input:checked + .slider {
-            background-color: #8b5cf6;
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
+        input:checked + .slider { background-color: #6c5ce7; }
+        input:checked + .slider:before { transform: translateX(22px); }
 
         /* Подсказки */
-        .hint {
-            font-size: 12px;
-            color: #888;
-            margin-top: 6px;
-        }
-
-        /* Быстрые кнопки стилей */
-        .style-chips {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-
-        .chip {
-            padding: 8px 16px;
-            background: #2a2a2a;
-            border: 2px solid #444;
-            border-radius: 20px;
-            color: #fff;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-            user-select: none;
-        }
-
-        .chip:hover {
-            background: #333;
-            border-color: #8b5cf6;
-        }
-
-        .chip:active {
-            transform: scale(0.95);
-        }
-
-        /* Анимация */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .container > * {
-            animation: fadeIn 0.5s ease;
-        }
+        .hint { font-size: 12px; color: #888; margin-top: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Заголовок -->
-    <div class="header">
-        <h1>🎵 VibeCraft Creator</h1>
-        <p>Создайте уникальную музыку с помощью AI</p>
-    </div>
-
-    <!-- Название трека -->
-    <div>
-        <label for="title">🏷️ Название трека</label>
-        <input type="text" id="title" placeholder="Моя крутая песня" maxlength="80">
-        <div class="hint">Придумайте название для вашего трека</div>
-    </div>
-
-    <!-- Стиль -->
-    <div>
-        <label for="genre">🎸 Стиль / Жанр</label>
-        <input type="text" id="genre" placeholder="Pop, Rock, Jazz..." maxlength="120">
-        <div class="style-chips">
-            <div class="chip" data-genre="Pop">🎤 Pop</div>
-            <div class="chip" data-genre="Rock">🎸 Rock</div>
-            <div class="chip" data-genre="Phonk">🔊 Phonk</div>
-            <div class="chip" data-genre="Jazz">🎷 Jazz</div>
-            <div class="chip" data-genre="Hip-Hop">🎧 Hip-Hop</div>
-            <div class="chip" data-genre="Electronic">⚡ Electronic</div>
-        </div>
-        <div class="hint">Выберите из готовых или напишите свой</div>
-    </div>
-
-    <!-- Переключатель инструментал -->
+    
     <div class="toggle-container">
-        <span class="toggle-label">🎻 Инструментал (без слов)</span>
+        <span>🎻 Инструментал (без слов)</span>
         <label class="switch">
             <input type="checkbox" id="instrumental">
             <span class="slider"></span>
         </label>
     </div>
 
-    <!-- Описание/Текст -->
-    <div id="descriptionBlock">
-        <label for="description">💡 Описание или Текст песни</label>
-        <textarea 
-            id="description" 
-            rows="5" 
-            placeholder="Опишите настроение или вставьте готовый текст песни...&#10;&#10;Примеры:&#10;• Грустная песня про расставание&#10;• Энергичный трек для тренировки&#10;• Или вставьте свой готовый текст"
-            maxlength="3000"
-        ></textarea>
-        <div class="hint" id="mode-hint">
-            💡 Короткое описание → AI сочинит песню по теме<br>
-            📝 Длинный текст → AI споёт ваши слова
-        </div>
+    <div>
+        <label for="prompt">💡 Описание или Текст песни</label>
+        <textarea id="prompt" rows="4" placeholder="Грустный рэп про экзамены... ИЛИ Вставь сюда свой текст"></textarea>
+        <div class="hint" id="mode-hint">Если инструментал выключен, AI споет этот текст (или придумает его).</div>
     </div>
+
+    <div>
+        <label for="style">🎸 Стиль / Жанр</label>
+        <input type="text" id="style" placeholder="Pop, Rock, Phonk, Jazz...">
+    </div>
+
+    <div>
+        <label for="title">🏷 Название трека</label>
+        <input type="text" id="title" placeholder="My Hit Song">
+    </div>
+
 </div>
 
 <script>
-    // Инициализация Telegram Web App
     let tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.ready();
+    tg.expand(); // Растянуть на весь экран
 
-    console.log('🚀 VibeCraft Web App загружен');
-    console.log('Platform:', tg.platform);
-    console.log('Version:', tg.version);
+    // Настраиваем Главную Кнопку (MainButton)
+    tg.MainButton.text = "СОЗДАТЬ ТРЕК 🚀";
+    tg.MainButton.show();
 
-    // Элементы
-    const instrumentalToggle = document.getElementById('instrumental');
-    const descriptionBlock = document.getElementById('descriptionBlock');
-    const modeHint = document.getElementById('mode-hint');
-    const titleInput = document.getElementById('title');
-    const genreInput = document.getElementById('genre');
-    const descriptionInput = document.getElementById('description');
+    // Логика нажатия
+    Telegram.WebApp.onEvent('mainButtonClicked', function(){
+        let isInstrumental = document.getElementById("instrumental").checked;
+        let promptText = document.getElementById("prompt").value;
+        let styleText = document.getElementById("style").value;
+        let titleText = document.getElementById("title").value;
 
-    // Быстрые кнопки стилей
-    const chips = document.querySelectorAll('.chip');
-    chips.forEach(chip => {
-        chip.addEventListener('click', () => {
-            const genre = chip.getAttribute('data-genre');
-            const currentGenre = genreInput.value.trim();
-            
-            if (currentGenre === '') {
-                genreInput.value = genre;
-            } else if (!currentGenre.includes(genre)) {
-                genreInput.value = currentGenre + ', ' + genre;
-            }
-            
-            // Визуальная обратная связь
-            chip.style.background = '#8b5cf6';
-            chip.style.borderColor = '#8b5cf6';
-            setTimeout(() => {
-                chip.style.background = '#2a2a2a';
-                chip.style.borderColor = '#444';
-            }, 300);
-            
-            // Haptic feedback
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('light');
-            }
-        });
-    });
-
-    // Переключатель инструментал
-    instrumentalToggle.addEventListener('change', () => {
-        if (instrumentalToggle.checked) {
-            modeHint.textContent = '🎹 Для инструментала укажите настроение или оставьте пустым';
-            descriptionInput.placeholder = 'Спокойная мелодия для релакса...';
-        } else {
-            modeHint.innerHTML = '💡 Короткое описание → AI сочинит песню по теме<br>📝 Длинный текст → AI споёт ваши слова';
-            descriptionInput.placeholder = 'Опишите настроение или вставьте готовый текст песни...';
+        // Простая валидация
+        if (promptText.trim() === "" && !isInstrumental) {
+            tg.showPopup({title: "Ошибка", message: "Напиши описание или текст песни!"});
+            return;
         }
-        
-        if (tg.HapticFeedback) {
-            tg.HapticFeedback.impactOccurred('medium');
-        }
-    });
-
-    // Настройка главной кнопки
-    tg.MainButton.text = "🎵 СОЗДАТЬ ТРЕК";
-    tg.MainButton.color = "#8b5cf6";
-    tg.MainButton.textColor = "#ffffff";
-
-    // Показываем/скрываем кнопку в зависимости от заполнения
-    function updateMainButton() {
-        const hasGenre = genreInput.value.trim() !== '';
-        
-        if (hasGenre) {
-            tg.MainButton.show();
-        } else {
-            tg.MainButton.hide();
-        }
-    }
-
-    genreInput.addEventListener('input', updateMainButton);
-    updateMainButton();
-
-    // Обработка нажатия главной кнопки
-    tg.MainButton.onClick(() => {
-        console.log('🎯 Кнопка создания нажата');
-        
-        const isInstrumental = instrumentalToggle.checked;
-        const description = descriptionInput.value.trim();
-        const genre = genreInput.value.trim();
-        const title = titleInput.value.trim();
-
-        // Валидация
-        if (genre === '') {
-            tg.showPopup({
-                title: "⚠️ Ошибка",
-                message: "Укажите стиль музыки!"
-            });
+        if (styleText.trim() === "") {
+            tg.showPopup({title: "Ошибка", message: "Укажи стиль музыки!"});
             return;
         }
 
-        if (!isInstrumental && description === '') {
-            tg.showPopup({
-                title: "⚠️ Ошибка",
-                message: "Для вокальной композиции нужно описание или текст песни!"
-            });
-            return;
-        }
-
-        // Формируем данные
-        const data = {
-            mode: isInstrumental ? 'instrumental' : 'normal',
-            description: description,
-            genre: genre,
-            title: title || 'VibeCraft Track'
+        // Формируем JSON для отправки боту
+        let data = {
+            mode: isInstrumental ? "instrumental" : "normal",
+            description: promptText,
+            genre: styleText,
+            title: titleText || "VibeCraft Track"
         };
 
-        console.log('📦 Отправляемые данные:', data);
-
-        // Отправляем
-        try {
-            const dataString = JSON.stringify(data);
-            console.log('📏 Размер данных:', dataString.length, 'байт');
-            
-            tg.sendData(dataString);
-            console.log('✅ Данные отправлены');
-            
-            // Haptic feedback
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.notificationOccurred('success');
-            }
-            
-        } catch (error) {
-            console.error('❌ Ошибка отправки:', error);
-            tg.showPopup({
-                title: "❌ Ошибка",
-                message: "Не удалось отправить данные. Попробуйте снова."
-            });
-        }
+        // Отправляем и закрываем
+        tg.sendData(JSON.stringify(data));
     });
 
-    // Показываем кнопку "Назад"
-    tg.BackButton.onClick(() => {
-        console.log('🔙 Нажата кнопка Назад');
-        tg.close();
-    });
-    tg.BackButton.show();
-
-    console.log('✅ Web App готов к работе');
 </script>
-
 </body>
 </html>
